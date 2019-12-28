@@ -17,17 +17,6 @@ const containerEl = document.getElementById('container'),
       formEl = document.getElementById('form'),
       warningEl = document.getElementById('warning');
 
-// hide quality assurance if user clicks outside
-window.addEventListener('click', (event) => {
-  const { target } = event;
-
-  if (target === qualityAssuranceEl || qualityAssuranceEl.contains(target)) {
-    return;
-  }
-
-  qualityAssuranceEl.classList.add('hidden');
-});
-
 // create modeler
 const bpmnModeler = new BpmnModeler({
   container: containerEl,
@@ -46,7 +35,8 @@ bpmnModeler.importXML(diagramXML, (err) => {
   }
 
   const moddle = bpmnModeler.get('moddle'),
-        modeling = bpmnModeler.get('modeling');
+        modeling = bpmnModeler.get('modeling'),
+        eventBus = bpmnModeler.get('eventBus');
 
   let analysisDetails,
       businessObject,
@@ -66,11 +56,8 @@ bpmnModeler.importXML(diagramXML, (err) => {
     }
   }
 
-  // open quality assurance if user right clicks on element
-  bpmnModeler.on('element.contextmenu', HIGH_PRIORITY, (event) => {
-    event.originalEvent.preventDefault();
-    event.originalEvent.stopPropagation();
-
+  eventBus.on('test.fire', (event) => {
+    //console.log(JSON.stringify(event));
     qualityAssuranceEl.classList.remove('hidden');
 
     ({ element } = event);
@@ -93,7 +80,7 @@ bpmnModeler.importXML(diagramXML, (err) => {
     lastCheckedEl.textContent = analysisDetails ? analysisDetails.lastChecked : '-';
 
     validate();
-  });
+  })
 
   // set suitability core and last checked if user submits
   formEl.addEventListener('submit', (event) => {

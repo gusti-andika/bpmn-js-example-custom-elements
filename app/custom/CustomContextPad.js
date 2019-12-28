@@ -3,11 +3,12 @@ const SUITABILITY_SCORE_HIGH = 100,
       SUITABILITY_SCORE_LOW = 25;
 
 export default class CustomContextPad {
-  constructor(bpmnFactory, config, contextPad, create, elementFactory, injector, translate) {
+  constructor(bpmnFactory, config, contextPad, create, elementFactory, injector, translate, eventBus) {
     this.bpmnFactory = bpmnFactory;
     this.create = create;
     this.elementFactory = elementFactory;
     this.translate = translate;
+    this.eventBus = eventBus;
 
     if (config.autoPlace !== false) {
       this.autoPlace = injector.get('autoPlace', false);
@@ -22,25 +23,15 @@ export default class CustomContextPad {
       bpmnFactory,
       create,
       elementFactory,
-      translate
+      translate,
+      eventBus
     } = this;
 
+    
     function appendServiceTask(suitabilityScore) {
       return function(event, element) {
-        if (autoPlace) {
-          const businessObject = bpmnFactory.create('bpmn:Task');
-    
-          businessObject.suitable = suitabilityScore;
-    
-          const shape = elementFactory.createShape({
-            type: 'bpmn:Task',
-            businessObject: businessObject
-          });
-    
-          autoPlace.append(element, shape);
-        } else {
-          appendServiceTaskStart(event, element);
-        }
+        eventBus.fire('test.fire', { element });
+
       }
     }
 
@@ -98,5 +89,6 @@ CustomContextPad.$inject = [
   'create',
   'elementFactory',
   'injector',
-  'translate'
+  'translate',
+  'eventBus'
 ];
